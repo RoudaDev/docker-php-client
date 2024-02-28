@@ -1,0 +1,85 @@
+<?php
+
+namespace Rouda\Docker\Api\Endpoint;
+
+class NodeUpdate extends \Rouda\Docker\Api\Runtime\Client\BaseEndpoint implements \Rouda\Docker\Api\Runtime\Client\Endpoint
+{
+    protected $id;
+    /**
+    * 
+    *
+    * @param string $id The ID of the node
+    * @param \Rouda\Docker\Api\Model\NodeSpec $body 
+    * @param array $queryParameters {
+    *     @var int $version The version number of the node object being updated. This is required
+    to avoid conflicting writes.
+    
+    * }
+    */
+    public function __construct(string $id, \Rouda\Docker\Api\Model\NodeSpec $body, array $queryParameters = [])
+    {
+        $this->id = $id;
+        $this->body = $body;
+        $this->queryParameters = $queryParameters;
+    }
+    use \Rouda\Docker\Api\Runtime\Client\EndpointTrait;
+    public function getMethod() : string
+    {
+        return 'POST';
+    }
+    public function getUri() : string
+    {
+        return str_replace(['{id}'], [$this->id], '/nodes/{id}/update');
+    }
+    public function getBody(\Symfony\Component\Serializer\SerializerInterface $serializer, $streamFactory = null) : array
+    {
+        return $this->getSerializedBody($serializer);
+    }
+    public function getExtraHeaders() : array
+    {
+        return ['Accept' => ['application/json']];
+    }
+    protected function getQueryOptionsResolver() : \Symfony\Component\OptionsResolver\OptionsResolver
+    {
+        $optionsResolver = parent::getQueryOptionsResolver();
+        $optionsResolver->setDefined(['version']);
+        $optionsResolver->setRequired(['version']);
+        $optionsResolver->setDefaults([]);
+        $optionsResolver->addAllowedTypes('version', ['int']);
+        return $optionsResolver;
+    }
+    /**
+     * {@inheritdoc}
+     *
+     * @throws \Rouda\Docker\Api\Exception\NodeUpdateBadRequestException
+     * @throws \Rouda\Docker\Api\Exception\NodeUpdateNotFoundException
+     * @throws \Rouda\Docker\Api\Exception\NodeUpdateInternalServerErrorException
+     * @throws \Rouda\Docker\Api\Exception\NodeUpdateServiceUnavailableException
+     *
+     * @return null
+     */
+    protected function transformResponseBody(\Psr\Http\Message\ResponseInterface $response, \Symfony\Component\Serializer\SerializerInterface $serializer, ?string $contentType = null)
+    {
+        $status = $response->getStatusCode();
+        $body = (string) $response->getBody();
+        if (200 === $status) {
+            return null;
+        }
+        if (400 === $status) {
+            throw new \Rouda\Docker\Api\Exception\NodeUpdateBadRequestException($serializer->deserialize($body, 'Rouda\\Docker\\Api\\Model\\ErrorResponse', 'json'), $response);
+        }
+        if (404 === $status) {
+            throw new \Rouda\Docker\Api\Exception\NodeUpdateNotFoundException($serializer->deserialize($body, 'Rouda\\Docker\\Api\\Model\\ErrorResponse', 'json'), $response);
+        }
+        if (500 === $status) {
+            throw new \Rouda\Docker\Api\Exception\NodeUpdateInternalServerErrorException($serializer->deserialize($body, 'Rouda\\Docker\\Api\\Model\\ErrorResponse', 'json'), $response);
+        }
+        if (503 === $status) {
+            throw new \Rouda\Docker\Api\Exception\NodeUpdateServiceUnavailableException($serializer->deserialize($body, 'Rouda\\Docker\\Api\\Model\\ErrorResponse', 'json'), $response);
+        }
+    }
+    public function getAuthenticationScopes() : array
+    {
+        return [];
+    }
+}

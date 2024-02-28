@@ -1,0 +1,34 @@
+{
+  "name": "rouda/docker-php-client",
+  "description": "Docker php client",
+  "keywords": [
+    "php",
+    "docker",
+    "rouda"
+  ],
+  "type": "library",
+  "license": "MIT",
+  "require-dev": {
+    "jane-php/open-api-2": "^7.6",
+    "friendsofphp/php-cs-fixer": "^3.50"
+  },
+  "config": {
+    "allow-plugins": {
+      "php-http/discovery": true
+    }
+  },
+  "require": {
+    "jane-php/open-api-runtime": "^7.6",
+    "symfony/http-client": "^7.0"
+  },
+  "extra": {
+    "symfony": {
+      "allow-contrib": "true"
+    }
+  },
+  "autoload": {
+    "psr-4": {
+      "Rouda\\Docker\\": "src/"
+    }
+  }
+}
